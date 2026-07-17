@@ -1,0 +1,149 @@
+{% extends "layout.html" %}
+
+{% block title %}Manage Members - {{ project.project_name }} | TaskFlow{% endblock %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('projects.list_projects') }}">Projects</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('projects.project_details', project_id=project.id) }}">{{ project.project_name }}</a></li>
+        <li class="breadcrumb-item active">Manage Members</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-people"></i> Team Members - {{ project.project_name }}</h2>
+</div>
+
+<div class="row g-4">
+
+    <!-- Current Members -->
+    <div class="col-md-7">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="bi bi-person-check"></i> Current Members ({{ members|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if members %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in members %}
+                            <tr>
+                                <td>
+                                    <strong>{{ member.full_name }}</strong>
+                                    {% if member.user_id == session["user_id"] %}
+                                    <span class="badge bg-info text-dark">You</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ member.email }}</td>
+                                <td>
+                                    <form method="POST" class="d-inline">
+                                        <input type="hidden" name="action" value="update_role">
+                                        <input type="hidden" name="user_id" value="{{ member.user_id }}">
+                                        <select name="role" class="form-select form-select-sm d-inline w-auto" onchange="this.form.submit()" {% if member.user_id == session["user_id"] %}disabled{% endif %}>
+                                            <option value="Admin" {% if member.role == 'Admin' %}selected{% endif %}>Admin</option>
+                                            <option value="Member" {% if member.role == 'Member' %}selected{% endif %}>Member</option>
+                                            <option value="Viewer" {% if member.role == 'Viewer' %}selected{% endif %}>Viewer</option>
+                                        </select>
+                                    </form>
+                                </td>
+                                <td><small class="text-muted">{{ member.joined_at.strftime('%d %b %Y') if member.joined_at else 'N/A' }}</small></td>
+                                <td>
+                                    {% if member.user_id != session["user_id"] %}
+                                    <form method="POST" class="d-inline" onsubmit="return confirm('Remove {{ member.full_name }} from this project?')">
+                                        <input type="hidden" name="action" value="remove">
+                                        <input type="hidden" name="user_id" value="{{ member.user_id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
+                                            <i class="bi bi-person-x"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No members in this project.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Members -->
+    <div class="col-md-5">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="bi bi-person-plus"></i> Add Members</h5>
+            </div>
+            <div class="card-body">
+                {% if non_members %}
+                <form method="POST">
+                    <input type="hidden" name="action" value="add">
+                    <div class="mb-3">
+                        <label class="form-label">Select User</label>
+                        <select class="form-select" name="user_id" required>
+                            <option value="">Choose a user...</option>
+                            {% for user in non_members %}
+                            <option value="{{ user.id }}">{{ user.full_name }} ({{ user.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" name="role">
+                            <option value="Member">Member</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Viewer">Viewer</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-person-plus"></i> Add Member
+                    </button>
+                </form>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-people" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2">All users are already members of this project.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- PostgreSQL Usage Info -->
+        <div class="card border-0 shadow-sm rounded-3 mt-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="bi bi-database"></i> PostgreSQL Feature</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Project Members</strong> use a <strong>junction table</strong> 
+                    (<code>project_members</code>) to create a 
+                    <strong>many-to-many relationship</strong> between users and projects.
+                </p>
+                <ul class="small text-muted mb-0">
+                    <li><code>SERIAL</code> auto-incrementing primary key</li>
+                    <li><code>FOREIGN KEY</code> with <code>ON DELETE CASCADE</code></li>
+                    <li><code>UNIQUE(project_id, user_id)</code> prevents duplicates</li>
+                    <li><code>INDEX</code> on both foreign keys for fast lookups</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
