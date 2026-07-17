@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block title %}TaskFlow - Project Management{% endblock %}
+
+{% block content %}
+
+<div class="row min-vh-75 align-items-center">
+
+    <div class="col-lg-6">
+
+        <div class="mt-5 pt-5">
+
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="bi bi-kanban"></i>
+                Welcome to TaskFlow
+            </h1>
+
+            <p class="lead text-muted mt-3">
+                A powerful project management tool to organize,
+                track, and manage your team's tasks efficiently.
+            </p>
+
+            <div class="mt-4">
+
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">
+                        <i class="bi bi-person-plus"></i>
+                        Get Started
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg px-4">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Login
+                    </a>
+                </div>
+
+            </div>
+
+            <div class="row mt-5 g-4">
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-kanban fs-1 text-primary"></i>
+                            <h6 class="mt-2">Workflow Board</h6>
+                            <small class="text-muted">Visual workflow management</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-people fs-1 text-success"></i>
+                            <h6 class="mt-2">Team Collaboration</h6>
+                            <small class="text-muted">Assign & track tasks</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-bar-chart fs-1 text-info"></i>
+                            <h6 class="mt-2">Reports</h6>
+                            <small class="text-muted">Insightful analytics</small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-6 d-none d-lg-block text-center">
+
+        <div class="mt-5 pt-5">
+            <i class="bi bi-kanban" style="font-size: 12rem; color: #0d6efd20;"></i>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
